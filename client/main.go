@@ -34,7 +34,7 @@ func main() {
 
 		tlsConfig := &tls.Config{
 			RootCAs:    caCertPool,
-			MinVersion: tls.VersionTLS12, // Setting minimum TLS version to 1.2
+			MinVersion: tls.VersionTLS12,
 		}
 		conn, err = tls.Dial("tcp", addr, tlsConfig)
 		if err != nil {

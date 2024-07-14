@@ -29,7 +29,6 @@ func (p *Persistence) Save(data map[string]string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	// Adjust directory permissions
 	err := os.MkdirAll("data", 0750)
 	if err != nil {
 		return fmt.Errorf("failed to create data directory: %w", err)
