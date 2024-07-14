@@ -1,3 +1,5 @@
+![code coverage badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/ci.yml/badge.svg)
+![code coverage badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/cd.yml/badge.svg)
 # Mini DB
 
 Mini DB is a simple key-value store that communicates through a TCP interface. It supports basic operations such as setting and looking up key-value pairs, and it persists data using Parquet files.
