@@ -2,7 +2,9 @@ package config
 
 import (
 	"log"
+	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -43,4 +45,14 @@ func LoadConfig() {
 	if err := viper.Unmarshal(&Cfg); err != nil {
 		log.Fatalf("Unable to decode into struct: %v", err)
 	}
+
+	if Cfg.Logging.Level == "" {
+		Cfg.Logging.Level = "info"
+	}
+
+	logLevel, err := logrus.ParseLevel(strings.ToLower(Cfg.Logging.Level))
+	if err != nil {
+		log.Fatalf("Invalid log level: %v", err)
+	}
+	logrus.SetLevel(logLevel)
 }
