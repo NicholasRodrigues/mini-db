@@ -1,0 +1,15 @@
+server:
+  port: "8080"
+  tls: false
+  tls_cert_file: "path"
+  tls_key_file: "path"
+
+storage:
+  file_path: "data/db.parquet"
+
+logging:
+  level: "info"
+
+security:
+  auth_enabled: true
+  auth_token: "incognia"
