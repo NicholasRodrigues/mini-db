@@ -4,12 +4,11 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"github.com/NicholasRodrigues/mini-db/internal/config"
+	"github.com/NicholasRodrigues/mini-db/internal/storage"
 	"net"
 	"strings"
 	"sync"
-
-	"mini-db/internal/config"
-	"mini-db/internal/storage"
 
 	"github.com/sirupsen/logrus"
 )
@@ -25,7 +24,7 @@ type Server struct {
 }
 
 func init() {
-	// Set the logging level based on the configuration
+	config.LoadConfig()
 	level, err := logrus.ParseLevel(config.Cfg.Logging.Level)
 	if err != nil {
 		log.Fatalf("Invalid log level: %v", err)
@@ -35,7 +34,7 @@ func init() {
 
 func NewServer() *Server {
 	address := fmt.Sprintf(":%s", config.Cfg.Server.Port)
-	storage := storage.NewStorage()
+	newStorage := storage.NewStorage()
 	persistence := storage.NewPersistence(config.Cfg.Storage.FilePath)
 
 	// Load persisted data
@@ -44,12 +43,12 @@ func NewServer() *Server {
 		log.Fatalf("Failed to load persisted data: %v", err)
 	}
 	for key, value := range data {
-		storage.Set(key, value)
+		newStorage.Set(key, value)
 	}
 
 	return &Server{
 		address:     address,
-		storage:     storage,
+		storage:     newStorage,
 		persistence: persistence,
 	}
 }
@@ -106,14 +105,13 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 		return fmt.Errorf("invalid command")
 	}
 
-	// Token Authentication
 	if config.Cfg.Security.AuthEnabled {
 		if len(parts) < 2 || parts[0] != config.Cfg.Security.AuthToken {
 			conn.Write([]byte("ERROR: Unauthorized\n"))
 			log.Warnf("Unauthorized access attempt from %s", conn.RemoteAddr().String())
 			return fmt.Errorf("unauthorized access")
 		}
-		// Remove the token from parts
+		// Removing token from command for the next steps
 		parts = parts[1:]
 	}
 
@@ -125,10 +123,12 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 		}
 		key := parts[1]
 		value := parts[2]
+		log.Printf("Received SET command for key: %s, value: %s", key, value)
 		s.storage.Set(key, value)
 
 		// Persist data
 		err := s.persistence.Save(s.storage.Store())
+		log.Printf("Persisted data: %v", s.storage.Store())
 		if err != nil {
 			log.Errorf("Failed to persist data: %v", err)
 			return fmt.Errorf("failed to persist data: %v", err)
