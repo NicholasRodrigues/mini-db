@@ -1,0 +1,16 @@
+# This is a test config file only. It is not recommended to use this in production.
+server:
+  port: "9090"
+  tls: false
+  tls_cert_file: ""
+  tls_key_file: ""
+
+storage:
+  file_path: "data/test_db.parquet"
+
+logging:
+  level: "debug"
+
+security:
+  auth_enabled: false
+  auth_token: ""

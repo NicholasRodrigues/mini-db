@@ -33,6 +33,11 @@ func (p *Persistence) Save(data map[string]string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	err := os.MkdirAll("data", os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to create data directory: %w", err)
+	}
+
 	fw, err := local.NewLocalFileWriter(p.filePath)
 	if err != nil {
 		return fmt.Errorf("failed to create file writer: %w", err)
@@ -43,12 +48,12 @@ func (p *Persistence) Save(data map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create parquet writer: %w", err)
 	}
-
-	defer func() {
-		if err := pw.WriteStop(); err != nil {
-			log.Printf("Error stopping parquet writer: %v", err)
+	defer func(pw *writer.ParquetWriter) {
+		err := pw.WriteStop()
+		if err != nil {
+			log.Printf("Failed to stop parquet writer: %v", err)
 		}
-	}()
+	}(pw)
 
 	for key, value := range data {
 		if err := pw.Write(&KeyValue{Key: key, Value: value}); err != nil {
@@ -56,7 +61,6 @@ func (p *Persistence) Save(data map[string]string) error {
 		}
 	}
 	log.Println("Data successfully saved to Parquet file.")
-
 	return nil
 }
 
@@ -70,7 +74,7 @@ func (p *Persistence) Load() (map[string]string, error) {
 	log.Println("File path: ", p.filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return data, nil
+			return data, nil // Empty map if file does not exist
 		}
 		return nil, fmt.Errorf("failed to open file reader: %w", err)
 	}
@@ -83,26 +87,18 @@ func (p *Persistence) Load() (map[string]string, error) {
 	defer pr.ReadStop()
 
 	numRows := pr.GetNumRows()
-	log.Println("Number of rows in Parquet file: ", numRows)
 	if numRows == 0 {
 		return data, nil
 	}
 
-	log.Println("Reading parquet file")
 	for i := int64(0); i < numRows; i++ {
 		kv := make([]KeyValue, 1)
 		if err := pr.Read(&kv); err != nil {
-			log.Printf("Error reading from Parquet file: %v", err)
-			break
+			return nil, fmt.Errorf("error reading from Parquet file: %w", err)
 		}
 		if len(kv) > 0 && kv[0].Key != "" {
-			log.Printf("Read key-value pair: %v", kv[0])
 			data[kv[0].Key] = kv[0].Value
-		} else {
-			log.Println("No more key-value pairs to read.")
-			break
 		}
 	}
-	log.Println("Data: ", data)
 	return data, nil
 }

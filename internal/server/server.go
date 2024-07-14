@@ -62,8 +62,8 @@ func (s *Server) Start() {
 		if err != nil {
 			log.Fatalf("Failed to load TLS certificates: %v", err)
 		}
-		config := &tls.Config{Certificates: []tls.Certificate{cer}}
-		ln, err = tls.Listen("tcp", s.address, config)
+		tlsConfig := &tls.Config{Certificates: []tls.Certificate{cer}}
+		ln, err = tls.Listen("tcp", s.address, tlsConfig)
 	} else {
 		ln, err = net.Listen("tcp", s.address)
 	}
@@ -78,6 +78,10 @@ func (s *Server) Start() {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
+			if opErr, ok := err.(*net.OpError); ok && !opErr.Temporary() {
+				log.Info("Server stopped accepting new connections")
+				break
+			}
 			log.Errorf("Failed to accept connection: %v", err)
 			continue
 		}
@@ -107,7 +111,10 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 
 	if config.Cfg.Security.AuthEnabled {
 		if len(parts) < 2 || parts[0] != config.Cfg.Security.AuthToken {
-			conn.Write([]byte("ERROR: Unauthorized\n"))
+			_, err := conn.Write([]byte("ERROR: Unauthorized\n"))
+			if err != nil {
+				return err
+			}
 			log.Warnf("Unauthorized access attempt from %s", conn.RemoteAddr().String())
 			return fmt.Errorf("unauthorized access")
 		}
@@ -155,4 +162,13 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 		return fmt.Errorf("unknown command")
 	}
 	return nil
+}
+
+func (s *Server) Stop() {
+	if s.listener != nil {
+		err := s.listener.Close()
+		if err != nil {
+			log.Errorf("Failed to close listener: %v", err)
+		}
+	}
 }
