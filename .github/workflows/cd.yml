@@ -1,8 +1,8 @@
-name: Continuous Deployment
+name: cd
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -17,6 +17,9 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version: '1.22'
+
+      - name: Install dependencies
+        run: go mod tidy
 
       - name: Build the app using build.sh
         run: |
