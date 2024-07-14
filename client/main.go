@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"net"
@@ -24,16 +25,35 @@ func main() {
 	var conn net.Conn
 	var err error
 	if useTLS {
-		conn, err = tls.Dial("tcp", addr, &tls.Config{
-			InsecureSkipVerify: true,
-		})
+		caCert, err := os.ReadFile("path/to/cacert.pem")
+		if err != nil {
+			log.Fatalf("Failed to load CA certificate: %v", err)
+		}
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
+
+		tlsConfig := &tls.Config{
+			RootCAs:    caCertPool,
+			MinVersion: tls.VersionTLS12, // Setting minimum TLS version to 1.2
+		}
+		conn, err = tls.Dial("tcp", addr, tlsConfig)
+		if err != nil {
+			log.Fatalf("Failed to connect to server with TLS: %v", err)
+		}
 	} else {
 		conn, err = net.Dial("tcp", addr)
+		if err != nil {
+			log.Fatalf("Failed to connect to server: %v", err)
+		}
 	}
-	if err != nil {
-		log.Fatalf("Failed to connect to server: %v", err)
-	}
-	defer conn.Close()
+	defer func() {
+		if conn != nil {
+			err := conn.Close()
+			if err != nil {
+				log.Printf("Failed to close connection: %v", err)
+			}
+		}
+	}()
 
 	fmt.Println("Connected to server at", addr)
 	fmt.Println("Enter commands (SET [<auth_token>] <key> <value> or LOOKUP [<auth_token>] <key>)")

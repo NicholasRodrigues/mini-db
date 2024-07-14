@@ -11,29 +11,26 @@ import (
 	"github.com/xitongsys/parquet-go/writer"
 )
 
-// KeyValue represents the key-value pair structure for Parquet
 type KeyValue struct {
 	Key   string `parquet:"name=key, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
 	Value string `parquet:"name=value, type=BYTE_ARRAY, convertedtype=UTF8, encoding=PLAIN_DICTIONARY"`
 }
 
-// Persistence represents the persistence layer for the storage.
 type Persistence struct {
 	filePath string
 	mu       sync.Mutex
 }
 
-// NewPersistence creates a new Persistence instance.
 func NewPersistence(filePath string) *Persistence {
 	return &Persistence{filePath: filePath}
 }
 
-// Save stores the key-value pairs to the Parquet file.
 func (p *Persistence) Save(data map[string]string) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	err := os.MkdirAll("data", os.ModePerm)
+	// Adjust directory permissions
+	err := os.MkdirAll("data", 0750)
 	if err != nil {
 		return fmt.Errorf("failed to create data directory: %w", err)
 	}
@@ -48,6 +45,7 @@ func (p *Persistence) Save(data map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create parquet writer: %w", err)
 	}
+
 	defer func(pw *writer.ParquetWriter) {
 		err := pw.WriteStop()
 		if err != nil {
@@ -64,17 +62,15 @@ func (p *Persistence) Save(data map[string]string) error {
 	return nil
 }
 
-// Load loads the key-value pairs from the Parquet file.
 func (p *Persistence) Load() (map[string]string, error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
 	data := make(map[string]string)
 	fr, err := local.NewLocalFileReader(p.filePath)
-	log.Println("File path: ", p.filePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return data, nil // Empty map if file does not exist
+			return data, nil // Return empty map if file does not exist
 		}
 		return nil, fmt.Errorf("failed to open file reader: %w", err)
 	}
