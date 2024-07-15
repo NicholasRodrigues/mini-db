@@ -206,6 +206,9 @@ Follow these guidelines to ensure that your interactions with Mini DB are secure
 
 For comprehensive monitoring, you can set up Prometheus to scrape metrics from the Mini DB server and Grafana to visualize these metrics.
 
+![image](https://github.com/user-attachments/assets/809c0d42-b3ba-4824-bcde-e794695427fd)
+
+
 ### Prometheus Setup
 
 1. **Prometheus Configuration**:
