@@ -19,6 +19,12 @@ Mini DB is a simple key-value store that communicates through a TCP interface, d
 7. [Troubleshooting](#troubleshooting)
 8. [Safe Usage with TLS and Authentication](#safe-usage-with-tls-and-authentication)
 9. [Monitoring Setup with Prometheus and Grafana](#monitoring-setup-with-prometheus-and-grafana)
+10. [Future Enhancements](#future-enhancements)
+
+## Aditional Content
+
+- [Engineer Journal - Understand my thought process for this project](docs/EngineerJournal.md)
+- [Server Limitations and Constrains](docs/ServerLimitations.md)
 
 ## Quick Start
 
@@ -264,12 +270,10 @@ For comprehensive monitoring, you can set up Prometheus to scrape metrics from t
 
 1. **Access Grafana**:
    - Open your browser and go to `http://localhost:3000`.
-   - Log in with `admin/admin` (change the password after the first login).
+   - Log in with `admin/admin`
 
 2. **Add Prometheus as a Data Source**:
-   - Navigate to **
-
-Configuration > Data Sources**.
+   - Navigate to **Configuration > Data Sources**.
    - Add a new data source and select **Prometheus**.
    - Set the URL to `http://prometheus:9090`.
    - Click **Save & Test**.
@@ -282,8 +286,6 @@ Configuration > Data Sources**.
 4. **Save the Dashboard**:
    - Click on **Save dashboard** icon at the top.
    - Provide a name for your dashboard and click **Save**.
-
-- You can also import the dashboard provided on `monitoring/grafana/provisioning/dashboard.json` by clicking on the **+** icon and selecting **Import**.
 
 ### Example Queries
 
@@ -307,6 +309,40 @@ Configuration > Data Sources**.
    process_resident_memory_bytes
    ```
 
-By following these steps, you can set up a comprehensive monitoring solution for Mini DB using Prometheus and Grafana.
+### Customizing Dashboard Colors
+
+To customize the colors in your Grafana dashboard:
+
+1. **Edit the Panel**:
+   - Hover over the panel and click on the **Panel Title**.
+   - Select **Edit** from the dropdown menu.
+
+2. **Customize Panel Colors**:
+   - In the panel editor, go to the **Overrides** or **Visualization** tab (depending on the panel type).
+
+   **For Graph Panels**:
+   - **Line Color**: Under the **Field** tab, click on the color box next to the field name to select a new color.
+   - **Area Fill Color**: Enable the **Fill** option and adjust the color using the color picker.
+
+   **For Stat Panels**:
+   - **Text and Background Colors**: Under the **Field** tab, click on **Thresholds**. Add thresholds and specify colors for different value ranges.
+   - **Gauge Color**: Under the **Field** tab, click on the color box next to the field name to select a new color.
+
+3. **Apply and Save**:
+   - Click on **Apply** to save the changes to the panel.
+   - Save the dashboard.
+
+## Future Enhancements
+
+- **Scalability**: Implement distributed processing and storage capabilities to scale beyond a single server instance.
+- **API Extensions**: Add more sophisticated query capabilities and support for different data types beyond simple strings.
+- **Advanced Security**: Implement more advanced security features such as OAuth or JWT-based authentication.
+- **User Interface**: Develop a web-based user interface for easier interaction with the Mini DB.
+
+## Closure
+
+Thank you for your interest in Mini DB. This project aims to provide a simple yet robust solution for managing key-value pairs with durability and security in mind. With features like TLS support, authentication, and comprehensive monitoring using Prometheus and Grafana, Mini DB is well-suited for various applications. We encourage you to explore, use, and contribute to the project, ensuring its continuous improvement and adaptability to meet evolving needs.
+
+For any questions or support, feel free to reach out via the project's GitHub repository. Happy coding!
 
 ---
