@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	address := "localhost:8080"
-	numClients := 2
-	numRequests := 10
+	address := "150.165.202.101:8080"
+	numClients := 100
+	numRequests := 1000
 
 	var wg sync.WaitGroup
 	for i := 0; i < numClients; i++ {

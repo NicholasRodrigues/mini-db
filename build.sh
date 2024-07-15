@@ -3,6 +3,9 @@
 set -e
 
 if [ "$1" == "build" ]; then
+    echo "Checking Dependencies..."
+    go mod tidy
+
     echo "Building server..."
     go build -o server ./cmd/main.go
 
