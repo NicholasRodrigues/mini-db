@@ -4,23 +4,33 @@ import (
 	"bufio"
 	"crypto/tls"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net"
+	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/NicholasRodrigues/mini-db/internal/config"
 	"github.com/NicholasRodrigues/mini-db/internal/storage"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
 )
 
-var log = logrus.New()
+var (
+	log = logrus.New()
 
-type Server struct {
-	address     string
-	storage     *storage.Storage
-	persistence *storage.Persistence
-	mu          sync.Mutex
-	listener    net.Listener
+	requestsTotal = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "requests_total",
+			Help: "Total number of requests",
+		},
+		[]string{"method"},
+	)
+)
+
+func StartMetricsServer() error {
+	http.Handle("/metrics", promhttp.Handler())
+	return http.ListenAndServe(":2112", nil)
 }
 
 func init() {
@@ -30,6 +40,16 @@ func init() {
 		log.Fatalf("Invalid log level: %v", err)
 	}
 	log.SetLevel(level)
+
+	prometheus.MustRegister(requestsTotal)
+}
+
+type Server struct {
+	address     string
+	storage     *storage.Storage
+	persistence *storage.Persistence
+	mu          sync.Mutex
+	listener    net.Listener
 }
 
 func NewServer() *Server {
@@ -97,6 +117,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
 		line := scanner.Text()
+		requestsTotal.WithLabelValues("command").Inc() // Increment the request counter
 		if err := s.processCommand(line, conn); err != nil {
 			log.Errorf("Error processing command: %v", err)
 		}

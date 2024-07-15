@@ -12,5 +12,6 @@ COPY . .
 RUN go build -o mini-db ./cmd
 
 EXPOSE 8080
+EXPOSE 2112
 
 CMD ["./mini-db"]

@@ -1,8 +1,13 @@
 version: '3.8'
+
 services:
   mini-db:
     build: .
     ports:
       - "8080:8080"
-    volumes:
-      - ./data:/app/data
+    networks:
+      - mini-db-network
+
+networks:
+  mini-db-network:
+    external: true

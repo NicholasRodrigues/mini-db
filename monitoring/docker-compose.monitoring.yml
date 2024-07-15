@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.29.1
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      - mini-db-network
+
+  grafana:
+    image: grafana/grafana:7.5.7
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    user: "root"
+    privileged: true
+    networks:
+      - mini-db-network
+
+networks:
+  mini-db-network:
+    external: true

@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'mini-db'
+    static_configs:
+      - targets: ['mini-db:2112']
