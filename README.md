@@ -33,13 +33,17 @@ Mini DB is a simple key-value store that communicates through a TCP interface, d
    git clone <repository_url>
    cd mini-db
    ```
+2. **Make sure all dependencies are set:**
+   ```sh
+   go mod tidy
+   ```
 
-2. **Build and run using Docker:**
+3. **Build and run using Docker:**
    ```sh
    docker-compose up --build
    ```
 
-3. **Or build and run locally:**
+4. **Or build and run locally:**
    ```sh
    ./build.sh build
    ./build.sh run-server
