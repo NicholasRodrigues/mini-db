@@ -113,13 +113,29 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 	}
 
 	cmd := strings.ToUpper(parts[0])
+	startIndex := 1
+
+	if config.Cfg.Security.AuthEnabled {
+		if len(parts) < 2 {
+			return fmt.Errorf("authentication required")
+		}
+		authToken := parts[1]
+		if authToken != config.Cfg.Security.AuthToken {
+			if _, err := conn.Write([]byte("ERROR: Authentication failed\n")); err != nil {
+				return err
+			}
+			return fmt.Errorf("authentication failed")
+		}
+		startIndex = 2
+	}
+
 	switch cmd {
 	case "SET":
-		if len(parts) != 3 {
+		if len(parts) < startIndex+2 {
 			return fmt.Errorf("invalid SET command")
 		}
-		key := parts[1]
-		value := parts[2]
+		key := parts[startIndex]
+		value := parts[startIndex+1]
 		s.storage.Set(key, value)
 
 		err := s.persistence.Save(s.storage.Store())
@@ -133,10 +149,10 @@ func (s *Server) processCommand(line string, conn net.Conn) error {
 		}
 		log.Infof("SET command successful for key: %s", key)
 	case "LOOKUP":
-		if len(parts) != 2 {
+		if len(parts) < startIndex+1 {
 			return fmt.Errorf("invalid LOOKUP command")
 		}
-		key := parts[1]
+		key := parts[startIndex]
 		value, found := s.storage.Get(key)
 		if !found {
 			if _, err := conn.Write([]byte("NOT FOUND\n")); err != nil {

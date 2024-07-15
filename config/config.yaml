@@ -1,8 +1,8 @@
 server:
   port: "8080"
   tls: false
-  tls_cert_file: "path/to/server.crt"
-  tls_key_file: "path/to/server.key"
+  tls_cert_file: "config/server.crt"
+  tls_key_file: "config/server.key"
 
 storage:
   file_path: "data/db.parquet"
