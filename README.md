@@ -1,22 +1,44 @@
-![code coverage badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/ci.yml/badge.svg)
-![code coverage badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/cd.yml/badge.svg)
+
+
+
+![CI Workflow Badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/ci.yml/badge.svg)
+![CD Workflow Badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/cd.yml/badge.svg)
+---
+
 # Mini DB
 
-Mini DB is a simple key-value store that communicates through a TCP interface. It supports basic operations such as setting and looking up key-value pairs, and it persists data using Parquet files.
+Mini DB is a simple key-value store that communicates through a TCP interface, designed to handle basic operations such as setting and looking up key-value pairs. It utilizes Parquet files for data persistence, ensuring data durability across server restarts.
+
+## Quick Start
+
+1. **Clone the repository:**
+   ```sh
+   git clone <repository_url>
+   cd mini-db
+   ```
+
+2. **Build and run using Docker:**
+   ```sh
+   docker-compose up --build
+   ```
+
+3. **Or build and run locally:**
+   ```sh
+   ./build.sh build
+   ./build.sh run-server
+   ```
 
 ## Features
 
-- **SET and LOOKUP commands**: Store and retrieve key-value pairs.
-- **Data persistence**: Data is persisted using Parquet files to ensure durability across server restarts.
-- **Optional TLS support**: Secure your connections with TLS.
-- **Token-based authentication**: Secure your database with an authentication token.
-- **Structured logging**: Logging is handled using Logrus, providing structured log outputs.
+- **SET and LOOKUP Commands:** Store and retrieve key-value pairs efficiently.
+- **Data Persistence:** Utilizes Parquet files for reliable data storage.
+- **TLS Support:** Optional TLS to secure connections.
+- **Authentication:** Supports token-based authentication for enhanced security.
+- **Structured Logging:** Uses Logrus for clear and structured logging.
 
-## Server
+## Configuration
 
-### Configuration
-
-The server configuration is managed using a YAML file. Below is an example configuration file (`config.yaml`):
+Configuration is managed via a YAML file (`config.yaml`). Here’s an example:
 
 ```yaml
 server:
@@ -36,76 +58,36 @@ security:
   auth_token: "your-secure-auth-token"
 ```
 
-### Running the Server
+## Building and Running
 
-1. Clone the repository and navigate to the project directory:
+### Using build.sh Script
 
-    ```sh
-    git clone <repository_url>
-    cd mini-db
-    ```
-
-2. Build and run the server application:
-
-    ```sh
-    go build -o server cmd/main.go
-    ./server
-    ```
-
-3. Using Docker:
-
-    ```sh
-    docker-compose up --build
-    ```
-
-### Testing the Server
-
-To run tests:
+Ensure Go is installed, and the script is executable:
 
 ```sh
-go test ./...
+chmod +x build.sh
+./build.sh build
+./build.sh run-server
+./build.sh run-client localhost 8080 [--tls]
 ```
 
-### Stopping the Server
+### Docker Instructions
 
-To stop the server gracefully, send a termination signal (e.g., `Ctrl+C` in the terminal running the server).
+Ensure Docker is installed and run:
 
-## Client
+```sh
+docker-compose up --build
+```
 
-The client application allows you to interact with the Mini DB server via the command line.
+## Client Application
 
-### Running the Client
+Interact with the Mini DB server using the client application:
 
-1. Navigate to the client directory:
-
-    ```sh
-    cd mini-db/client
-    ```
-
-2. Build and run the client application:
-
-    ```sh
-    go build -o client main.go
-    ./client <address> <port> [--tls]
-    ```
-
-    Replace `<address>` and `<port>` with the appropriate server address and port. Use the `--tls` flag if the server is using TLS.
-
-### Commands
-
-- **SET**: Stores a key-value pair. Optionally, an auth token can be included.
-  
-    ```sh
-    SET [<auth_token>] my_key my_value
-    ```
-
-- **LOOKUP**: Retrieves the value associated with a key. Optionally, an auth token can be included.
-  
-    ```sh
-    LOOKUP [<auth_token>] my_key
-    ```
-
-- **EXIT**: Exits the client application.
+```sh
+cd client
+go build -o client main.go
+./client <address> <port> [--tls]
+```
 
 ### Example Usage
 
@@ -119,66 +101,16 @@ my_value
 Exiting...
 ```
 
-### Build and Run Using build.sh
+## Server Management
 
-The `build.sh` script simplifies the process of building and running the Mini DB server and client applications. Here are the detailed instructions on how to use this script:
+**Testing:** Run tests with `go test ./...`.
 
-#### Requirements
+**Stopping the Server:** Use `Ctrl+C` in the terminal or `docker-compose down` for Docker users.
 
-Before running the script, ensure you have the following prerequisites installed:
+## Troubleshooting
 
-- **Go**: The server and client are built using Go. Make sure you have Go installed on your system. You can download it from [Go's official website](https://golang.org/dl/).
+- Check all file paths and environment variables.
+- Ensure Go and Docker are properly installed and configured.
+- Review script outputs and server logs for error messages.
 
-#### Using the build.sh Script
-
-The `build.sh` script provides a convenient way to build and run the server and client. Follow these steps:
-
-1. **Grant Execution Permissions**:
-   
-   First, ensure that the `build.sh` script is executable. You can set the execution permission with the following command:
-   
-   ```sh
-   chmod +x build.sh
-   ```
-
-2. **Build the Server and Client**:
-   
-   To compile both the server and client applications, use the `build` command:
-   
-   ```sh
-   ./build.sh build
-   ```
-
-   This command will generate executable files named `server` and `client` in your project directory.
-
-3. **Run the Server**:
-   
-   After building, you can start the server using the `run-server` command:
-   
-   ```sh
-   ./build.sh run-server
-   ```
-
-   Ensure that the server's configuration in `config.yaml` is correct before starting the server.
-
-4. **Run the Client**:
-   
-   To start the client, use the `run-client` command followed by the server's address and port. Include the `--tls` option if TLS is enabled:
-   
-   ```sh
-   ./build.sh run-client <address> <port> [--tls]
-   ```
-
-   Replace `<address>` and `<port>` with the appropriate values. For example:
-   
-   ```sh
-   ./build.sh run-client localhost 8080
-   ```
-
-#### Troubleshooting
-
-If you encounter any issues while using the `build.sh` script, check the following:
-
-- Ensure all file paths and environment variables are set correctly in the script and your system.
-- Verify that all dependencies, particularly Go, are installed and configured correctly.
-- Check the script output for any error messages that can help diagnose issues.
+---
