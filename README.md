@@ -1,3 +1,6 @@
+
+---
+
 ![CI Workflow Badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/ci.yml/badge.svg)
 ![CD Workflow Badge](https://github.com/NicholasRodrigues/mini-db/actions/workflows/cd.yml/badge.svg)
 
@@ -5,7 +8,17 @@
 
 Mini DB is a simple key-value store that communicates through a TCP interface, designed to handle basic operations such as setting and looking up key-value pairs. It utilizes Parquet files for data persistence, ensuring data durability across server restarts.
 
-[Jump to Safe Usage with TLS and Authentication](#safe-usage-with-tls-and-authentication)
+## Table of Contents
+
+1. [Quick Start](#quick-start)
+2. [Features](#features)
+3. [Configuration](#configuration)
+4. [Building and Running](#building-and-running)
+5. [Client Application](#client-application)
+6. [Server Management](#server-management)
+7. [Troubleshooting](#troubleshooting)
+8. [Safe Usage with TLS and Authentication](#safe-usage-with-tls-and-authentication)
+9. [Monitoring Setup with Prometheus and Grafana](#monitoring-setup-with-prometheus-and-grafana)
 
 ## Quick Start
 
@@ -36,7 +49,7 @@ Mini DB is a simple key-value store that communicates through a TCP interface, d
 
 ## Configuration
 
-Configuration is managed via a YAML file on (`config/config.yaml`). Here’s an example:
+Configuration is managed via a YAML file (`config/config.yaml`). Here’s an example:
 
 ```yaml
 server:
@@ -144,11 +157,11 @@ For enhanced security, Mini DB supports both TLS for encrypted connections and t
 
 Make sure your server application is configured to use these TLS files. Update the configuration settings in your `config.yaml` or wherever your server application expects them:
 
-   ```yaml
-    tls: true
-    tls_cert_file: "path/to/server.crt"
-    tls_key_file: "path/to/server.key"
-   ```
+```yaml
+tls: true
+tls_cert_file: "path/to/server.crt"
+tls_key_file: "path/to/server.key"
+```
 
 ### Running the Server with TLS
 
@@ -182,5 +195,118 @@ If you encounter TLS-related errors during testing, check the following:
 2. **Client Usage:** When starting the client, use `-auth=true` and provide the token in your commands as shown in the examples.
 
 Follow these guidelines to ensure that your interactions with Mini DB are secure and your data is protected against unauthorized access.
+
+## Monitoring Setup with Prometheus and Grafana
+
+For comprehensive monitoring, you can set up Prometheus to scrape metrics from the Mini DB server and Grafana to visualize these metrics.
+
+### Prometheus Setup
+
+1. **Prometheus Configuration**:
+   Create a `prometheus.yml` file in the `monitoring` directory with the following content:
+
+   ```yaml
+   global:
+     scrape_interval: 15s
+
+   scrape_configs:
+     - job_name: 'mini-db'
+       static_configs:
+         - targets: ['mini-db:2112']
+   ```
+
+2. **Docker Compose for Monitoring**:
+   Create a `docker-compose.monitoring.yml` file in the `monitoring` directory with the following content:
+
+   ```yaml
+   version: '3.8'
+
+   services:
+     prometheus:
+       image: prom/prometheus:v2.29.1
+       volumes:
+         - ./prometheus.yml:/etc/prometheus/prometheus.yml
+       ports:
+         - "9090:9090"
+       networks:
+         - mini-db-network
+
+     grafana:
+       image: grafana/grafana:7.5.7
+       ports:
+         - "3000:3000"
+       volumes:
+         - ./grafana:/var/lib/grafana
+       environment:
+         - GF_SECURITY_ADMIN_PASSWORD=admin
+       user: "root"
+       privileged: true
+       networks:
+         - mini-db-network
+
+   networks:
+     mini-db-network:
+       external: true
+   ```
+
+3. **Start Prometheus and Grafana**:
+   Ensure Docker is installed and run:
+
+   ```sh
+   docker-compose -f monitoring/docker-compose.monitoring.yml up --build
+   ```
+
+4. **Verify Prometheus Setup**:
+   - Access Prometheus at `http://localhost:9090`.
+   - Check if the `mini-db` job is listed under `Status > Targets`.
+
+### Grafana Setup
+
+1. **Access Grafana**:
+   - Open your browser and go to `http://localhost:3000`.
+   - Log in with `admin/admin` (change the password after the first login).
+
+2. **Add Prometheus as a Data Source**:
+   - Navigate to **
+
+Configuration > Data Sources**.
+   - Add a new data source and select **Prometheus**.
+   - Set the URL to `http://prometheus:9090`.
+   - Click **Save & Test**.
+
+3. **Create a Dashboard**:
+   - Click on the **+** icon on the left sidebar and select **Dashboard**.
+   - Click on **Add new panel** to create a new visualization.
+   - Use Prometheus queries to visualize metrics (e.g., `sum(requests_total) by (method)`).
+
+4. **Save the Dashboard**:
+   - Click on **Save dashboard** icon at the top.
+   - Provide a name for your dashboard and click **Save**.
+
+- You can also import the dashboard provided on `monitoring/grafana/provisioning/dashboard.json` by clicking on the **+** icon and selecting **Import**.
+
+### Example Queries
+
+1. **Total Requests**:
+   ```prometheus
+   sum(requests_total) by (method)
+   ```
+
+2. **Request Rate**:
+   ```prometheus
+   rate(requests_total[1m])
+   ```
+
+3. **CPU Usage**:
+   ```prometheus
+   sum(rate(process_cpu_seconds_total[1m])) by (instance)
+   ```
+
+4. **Memory Usage**:
+   ```prometheus
+   process_resident_memory_bytes
+   ```
+
+By following these steps, you can set up a comprehensive monitoring solution for Mini DB using Prometheus and Grafana.
 
 ---
