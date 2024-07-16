@@ -33,22 +33,19 @@ Mini DB is a simple key-value store that communicates through a TCP interface, d
    git clone <repository_url>
    cd mini-db
    ```
-2. **Make sure all dependencies are set:**
+
+2. **Build and run using Docker:**
    ```sh
-   go mod tidy
+   ./run_server.sh
    ```
 
-3. **Build and run using Docker:**
-   ```sh
-   docker-compose up --build
-   ```
-
-4. **Or build and run locally:**
+3. **Or build and run locally:**
    ```sh
    ./build.sh build
    ./build.sh run-server
    ```
 
+- note: if you run with docker, grafana and prometheus will be available at `http://localhost:3000` and `http://localhost:9090` respectively.
 ## Features
 
 - **SET and LOOKUP Commands:** Store and retrieve key-value pairs efficiently.
