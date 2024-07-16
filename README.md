@@ -89,12 +89,21 @@ chmod +x build.sh
 ./build.sh run-client -auth=true -tls=true -ca-cert=path/to/client.pem localhost 8080
 ```
 
+Or you can just run:
+
+```sh
+chmod +x build.sh
+./build.sh build
+./build.sh run-server
+./build.sh run-client localhost 8080
+```
+
 ### Docker Instructions
 
 Ensure Docker is installed and run:
 
 ```sh
-docker-compose up --build
+./run_server.sh
 ```
 
 ## Client Application
@@ -107,6 +116,14 @@ go build -o client main.go
 ./client -auth=true -tls=true -ca-cert=path/to/client.pem <address> <port>
 ```
 
+Or you can just run:
+
+```sh
+cd client
+go build -o client main.go
+./client <address> <port>
+```
+
 ### Example Usage
 
 ```sh
@@ -114,6 +131,18 @@ go build -o client main.go
 > SET your-secure-auth-token my_key my_value
 OK
 > LOOKUP your-secure-auth-token my_key
+my_value
+> EXIT
+Exiting...
+```
+
+Without security concerns:
+
+```sh
+./client localhost 8080
+> SET my_key my_value
+OK
+> LOOKUP  my_key
 my_value
 > EXIT
 Exiting...
