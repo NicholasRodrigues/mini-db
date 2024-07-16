@@ -66,7 +66,7 @@ Welcome to the detailed engineer's journal for the development of Mini DB, a min
 
 ### Performance Testing
 
-- Conducted load testing to validate the system's performance under stress and to benchmark its response times and memory usage. (Go script can be found on `montioring/load.go`)
+- Conducted load testing to validate the system's performance under stress and to benchmark its response times and memory usage. (Go script can be found on `monitoring/load.go`)
 - Monitored resource utilization and latency to ensure the system meets performance requirements.
 
 ## Monitoring and Alerting
