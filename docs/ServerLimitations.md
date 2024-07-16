@@ -1,5 +1,3 @@
-Certainly! Here's a rewritten version of the README that maintains a positive tone while being honest about the limitations and constraints, demonstrating your understanding and awareness of areas for potential improvement:
-
 ---
 
 # Mini DB Server: Limitations and Considerations
